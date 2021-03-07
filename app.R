@@ -1,12 +1,12 @@
 library(shiny)
 library(menzerath)
+library(gitlink)
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    
     # Application title
-    titlePanel("Menzerath-Altmann's law in text."),
-    
+    titlePanel("Menzerath-Altmann's law in texts."),
+    ribbon_css("https://github.com/colearendt/gitlink"),    
 
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -43,6 +43,7 @@ ui <- fluidPage(
         # Show a plot of the generated distribution
         mainPanel(
            plotOutput("distPlot"),
+           a("https://sellisd.github.io/menzerath/")
 
         )
     )
