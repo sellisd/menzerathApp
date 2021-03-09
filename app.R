@@ -19,7 +19,7 @@ ui <- fluidPage(
                           label = "Sample text to analyze",
                           value = "Greece* {which* is* the* most* beau*ti*ful* coun*try* +I* know* +}was* the* first* place* +we* vi*si*ted* in* Eu*ro*pe* +.",
                           rows = "10"),
-            helpText("Delimiters should be a single character"),
+            p("Delimiters should be a single character"),
             textInput("construct_delimiter",
                       label = "Construct delimiter",
                       value = "+",
