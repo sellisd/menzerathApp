@@ -1,6 +1,8 @@
 library(shiny)
 library(menzerath)
 library(gitlink)
+library(shinyFeedback)
+library(readr)
 
 equation_list = list("MAL"="$$y = ax^be^{-cx}$$",
                      "simplified_1"= "$$y = ae^{-cx}$$",
@@ -10,13 +12,17 @@ equation_list = list("MAL"="$$y = ax^be^{-cx}$$",
                      "Milicka_4"= "$$L_{n-1} = a_n + \\frac{b_n}{L_n}$$",
                      "Milicka_8"= "$$L_{n-1} = a_n + \\frac{b_n}{L_n} + \\frac{c_n\\min(1,L_n-1)}{L_n}$$")
 
+
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    #theme = bslib::bs_theme(bootswatch = "pulse"),
+    shinyFeedback::useShinyFeedback(),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
+            fileInput("upload", "Upload a text file to analyze"),
             textAreaInput("text",
-                          label = "Sample text to analyze",
+                          label = "or type / paste text",
                           value = "Greece* {which* is* the* most* beau*ti*ful* coun*try* +I* know* +}was* the* first* place* +we* vi*si*ted* in* Eu*ro*pe* +.",
                           rows = "10"),
             p("Delimiters should be a single character"),
@@ -49,8 +55,7 @@ ui <- fluidPage(
                           "Milicka_2"#, the remaining are yet unimplemented
                           # "Milicka_4",
                           # "Milicka_8"
-                          ),
-            )
+                          )),
         ),
         
 
@@ -61,13 +66,15 @@ ui <- fluidPage(
            uiOutput("equation"),
            p("Fitted parameters:"),
            tableOutput("parameters"),
+
            a("https://sellisd.github.io/menzerath/", href="https://sellisd.github.io/menzerath/")
         )
     )
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
+    #thematic::thematic_shiny()
     mz_object <- reactive({
         counts_df <- process_text(input$text,
                                   input$construct_delimiter,
@@ -85,12 +92,57 @@ server <- function(input, output) {
     })
     output$equation <- renderUI(withMathJax(equation_list[[input$method]]))
     output$parameters <- renderTable({
+        validate_construct_delimiter()
+        validate_constituent_delimiter()
+        validate_subconstituent_delimiter()
+        validate_discontinued_constituent_delimiter_begin()
+        validate_discontinued_constituent_delimiter_end()
         mz <- mz_object()
         fitted_mz <- fit(mz, method = input$method)
         get_parameters(fitted_mz)
     })
     
+    is_cpp_char <- function(x){
+        is.character(x) && nchar(x) == 1 && length(x) == 1
+    }
 
+    # User feedback for each delimiter    
+    validate_construct_delimiter <- reactive({
+        is_char <- is_cpp_char(input$construct_delimiter)
+        shinyFeedback::feedbackDanger("construct_delimiter", !is_char, "delimiter must be single character")
+        req(is_char)
+        input$construct_delimiter
+    })
+    validate_constituent_delimiter <- reactive({
+        is_char <- is_cpp_char(input$constituent_delimiter)
+        shinyFeedback::feedbackDanger("constituent_delimiter", !is_char, "delimiter must be single character")
+        req(is_char)
+        input$constituent_delimiter
+    })
+    validate_subconstituent_delimiter <- reactive({
+        is_char <- is_cpp_char(input$subconstituent_delimiter)
+        shinyFeedback::feedbackDanger("subconstituent_delimiter", !is_char, "delimiter must be single character")
+        req(is_char)
+        input$subconstituent_delimiter
+    })
+    validate_discontinued_constituent_delimiter_begin <- reactive({
+        is_char <- is_cpp_char(input$discontinued_constituent_delimiter_begin)
+        shinyFeedback::feedbackDanger("discontinued_constituent_delimiter_begin", !is_char, "delimiter must be single character")
+        req(is_char)
+        input$discontinued_constituent_delimiter_begin
+    })
+    validate_discontinued_constituent_delimiter_end <- reactive({
+        is_char <- is_cpp_char(input$discontinued_constituent_delimiter_end)
+        shinyFeedback::feedbackDanger("discontinued_constituent_delimiter_end", !is_char, "delimiter must be single character")
+        req(is_char)
+        input$discontinued_constituent_delimiter_end
+    })
+    
+    # Upload text
+    observe({
+        req(input$upload)
+        updateTextAreaInput(session, "text", value = read_file(input$upload$datapath))
+    })
 }
 
 # Run the application 
