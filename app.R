@@ -88,7 +88,14 @@ server <- function(input, output, session) {
 
     output$distPlot <- renderPlot({
         mz <- mz_object()
-        plot(mz, fit = TRUE, method=input$method)
+        if(nobs(mz) == 0 ){
+            plot(mz, fit = FALSE) + 
+                ggplot2::xlim(0, 10) + 
+                ggplot2::ylim(0, 10) +
+                ggplot2::annotate("text", x = 5, y = 5, label = "No Data")
+        }else{
+          plot(mz, fit = TRUE, method=input$method)
+        }
     })
     output$equation <- renderUI(withMathJax(equation_list[[input$method]]))
     output$parameters <- renderTable({
@@ -98,8 +105,13 @@ server <- function(input, output, session) {
         validate_discontinued_constituent_delimiter_begin()
         validate_discontinued_constituent_delimiter_end()
         mz <- mz_object()
-        fitted_mz <- fit(mz, method = input$method)
-        get_parameters(fitted_mz)
+        if(nobs(mz)==0){
+            df <- data.frame()
+        }else{
+            fitted_mz <- fit(mz, method = input$method)
+            df <- get_parameters(fitted_mz)
+        }
+        df
     })
     
     is_cpp_char <- function(x){
