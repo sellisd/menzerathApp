@@ -4,6 +4,7 @@ library(gitlink)
 library(shinyFeedback)
 library(readr)
 library(glue)
+library(gitlink)
 
 equation_list = list("MAL"="$$y = ax^be^{-cx}$$",
                      "simplified_1"= "$$y = ae^{-cx}$$",
@@ -21,6 +22,7 @@ error_codes = list("1" = "Discontinued constituent delimiters are not balanced",
 ui <- fluidPage(
     theme = bslib::bs_theme(bootswatch = "pulse"),
     shinyFeedback::useShinyFeedback(),
+    ribbon_css("https://github.com/sellisd/menzerathApp", position = "right", text = "Fork me on GitHub"),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
