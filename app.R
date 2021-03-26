@@ -3,6 +3,7 @@ library(menzerath)
 library(gitlink)
 library(shinyFeedback)
 library(readr)
+library(glue)
 
 equation_list = list("MAL"="$$y = ax^be^{-cx}$$",
                      "simplified_1"= "$$y = ae^{-cx}$$",
@@ -12,10 +13,13 @@ equation_list = list("MAL"="$$y = ax^be^{-cx}$$",
                      "Milicka_4"= "$$L_{n-1} = a_n + \\frac{b_n}{L_n}$$",
                      "Milicka_8"= "$$L_{n-1} = a_n + \\frac{b_n}{L_n} + \\frac{c_n\\min(1,L_n-1)}{L_n}$$")
 
+error_codes = list("1" = "Discontinued constituent delimiters are not balanced",
+                   "2" = "Construct delimiter is not after a constituent and a subconstituent delimiter",
+                   "3" = "Constituent delimiter is not after a subconstituent delimiter")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    #theme = bslib::bs_theme(bootswatch = "pulse"),
+    theme = bslib::bs_theme(bootswatch = "pulse"),
     shinyFeedback::useShinyFeedback(),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
@@ -75,6 +79,7 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
     #thematic::thematic_shiny()
+    
     mz_object <- reactive({
         counts_df <- process_text(input$text,
                                   input$construct_delimiter,
@@ -82,6 +87,9 @@ server <- function(input, output, session) {
                                   input$subconstituent_delimiter,
                                   input$discontinued_constituent_delimiter_begin,
                                   input$discontinued_constituent_delimiter_end)
+        is_valid <- !('Errors' %in% colnames(counts_df))
+        shinyFeedback::feedbackDanger("text", !is_valid, glue("Error: {error_codes[counts_df$Errors]}"))
+        req(is_valid)
         counts_df$average_subconstituents = counts_df$subconstituents/counts_df$constituents
         menzerath(counts_df,x="constituents", y = "average_subconstituents")}
     )
