@@ -6,7 +6,7 @@ library(readr)
 library(glue)
 library(gitlink)
 library(hyphenatr)
-
+library(waiter)
 
 construct_delimiter <- " "
 constituent_delimiter <- "-"
@@ -26,7 +26,7 @@ error_codes = list("1" = "Discontinued constituent delimiters are not balanced",
                    "2" = "Construct delimiter is not after a constituent and a subconstituent delimiter",
                    "3" = "Constituent delimiter is not after a subconstituent delimiter")
 
-graphemes <- c("p"="h","c"="k","q"="u","c"="h","s"="h","t"="h","n"="g")
+graphemes <- c("p"="h","c"="k","q"="u","c"="h","s"="h","t"="h","n"="g", "w"="h")
 
 merge_characters_list <- function(x){
     merged <- vector(mode="list", length = length(x))
@@ -71,6 +71,7 @@ collapse_words <- function(x){
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
+    use_waiter(),
     titlePanel("Explore Menzerath's law"),
     theme = bslib::bs_theme(bootswatch = "pulse"),
     shinyFeedback::useShinyFeedback(),
@@ -125,17 +126,24 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
+    w <- Waiter$new(id = "distPlot")
     #thematic::thematic_shiny()
     observeEvent(input$autoannotate, {
-        words <- strsplit(input$text, split = " ", fixed = TRUE)[[1]]
+        w$show()
+        w$update(html=span("substituting"))
+        reannotated <- gsub("[/-]", "", input$text, perl = TRUE)
+        w$update(html=span("splitting"))
+        words <- strsplit(reannotated, split = " ", fixed = TRUE)[[1]]
         tryCatch({
+          w$update(html=span("hyphenating"))
           hyphenated <- hyphenate(words, simplify = FALSE)
           graphemes_proxy <- sapply(hyphenated,strsplit, split="")
           graphemes_proxy <- sapply(graphemes_proxy, merge_characters_list)
+          w$update(html=span("updating"))
           updateTextAreaInput(session, "text", value = paste(sapply(graphemes_proxy,collapse_words),collapse="/- "))
           },
           error = function(e){showNotification("This is an error.")})
-        
+       w$hide()
     })
     mz_object <- reactive({
         counts_df <- process_text(input$text,
