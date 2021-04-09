@@ -71,21 +71,32 @@ collapse_words <- function(x){
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-    titlePanel("Menzerath's law in words, syllables and phonemes"),
+    titlePanel("Explore Menzerath's law"),
     theme = bslib::bs_theme(bootswatch = "pulse"),
     shinyFeedback::useShinyFeedback(),
     ribbon_css("https://github.com/sellisd/menzerathApp/issues", position = "right", text = "Report a bug"),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            p(" annotate it with dashes (-) separating syllables and slashes (/) separating phonemes."),
+            p("Menzerath's law can briefly be stated as:"),
+            tags$b(tags$i('"the longer the word the shorter its syllables"')),
+            p("(Altman, 1980)"),
+            tags$h3("Instructions"),
+            tags$ol(tags$li("Input or upload text"),
+                    tags$li("Annotate by:"),
+                    tags$ul(
+                      tags$li("clicking on the auto-annotate button or"),
+                      tags$li("manually separate words by spaces ( ), syllables with dashes (-) and phonemes by slashes (/)")
+                    )
+            ),
             fileInput("upload", "Upload a text file to analyze"),
             textAreaInput("text",
-                          label = "or type / paste text",
+                          label = "or type / paste text below",
                           value = "G/r/ee/c/e/- wh/i/ch/- i/s/- th/e/- m/o/s/t/- b/e/au/-t/i/-f/u/l/- c/ou/n/-t/r/y/- I/- k/n/o/w/- w/a/s/- th/e/- f/i/r/s/t/- p/l/a/c/e/- w/e/- v/i/s/-i/t/e/d/- i/n/- E/u/r/o/p/e/.",
                           rows = "10",
                           resize = "none"),
             actionButton("autoannotate", "Auto-annotate"),
+            tags$hr(),
             selectInput("method",
                         "Fitting Method",
                         c("MAL",
