@@ -165,9 +165,13 @@ server <- function(input, output, session) {
             plot(mz, fit = FALSE) + 
                 ggplot2::xlim(0, 10) + 
                 ggplot2::ylim(0, 10) +
-                ggplot2::annotate("text", x = 5, y = 5, label = "No Data")
+                ggplot2::annotate("text", x = 5, y = 5, label = "No Data") +
+                ggplot2::labs(x = "ln(word size)",
+                     y = "ln(average syllable size)")
         }else{
-          plot(mz, fit = TRUE, method=input$method)
+          plot(mz, fit = TRUE, method=input$method) +
+            ggplot2::labs(x = "ln(word size)",
+                 y = "ln(average syllable size)")
         }
     })
     output$equation <- renderUI(withMathJax(equation_list[[input$method]]))
