@@ -131,7 +131,8 @@ server <- function(input, output, session) {
     observeEvent(input$autoannotate, {
         w$show()
         w$update(html=span("substituting"))
-        reannotated <- gsub("[/-]", "", input$text, perl = TRUE)
+        #keep only space and word characters
+        reannotated <- gsub("[^a-z A-Z]", "", input$text, perl = TRUE)
         w$update(html=span("splitting"))
         words <- strsplit(reannotated, split = " ", fixed = TRUE)[[1]]
         tryCatch({
