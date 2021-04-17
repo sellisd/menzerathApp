@@ -26,7 +26,7 @@ error_codes = list("1" = "Discontinued constituent delimiters are not balanced",
                    "2" = "Construct delimiter is not after a constituent and a subconstituent delimiter",
                    "3" = "Constituent delimiter is not after a subconstituent delimiter")
 
-graphemes <- c("p"="h","c"="k","q"="u","c"="h","s"="h","t"="h","n"="g", "w"="h")
+graphemes <- c("P"="H","C"="K","Q"="U","C"="H","S"="H","T"="H","N"="G", "W"="H")
 
 merge_characters_list <- function(x){
     merged <- vector(mode="list", length = length(x))
@@ -50,14 +50,14 @@ merge_characters <- function(x){
       return(x)
   }
   to_merge <- numeric(0)
-  previous <- x[1]
+  previous <- toupper(x[1])
   for(i in c(2:length(x))){
-      if( (x[i] == previous) ||
-          ((previous %in% names(graphemes)) && (graphemes[previous] ==x[i])) ){
+      if( (toupper(x[i]) == previous) ||
+          ((previous %in% names(graphemes)) && (graphemes[previous] == toupper(x[i]))) ){
           to_merge <- c(to_merge,i)
           x[i-1] = paste0(x[i-1],x[i], sep="", collapse = "")
       }
-      previous = x[i]
+      previous = toupper(x[i])
   }
   if(length(to_merge>0)){
       x <- x[-to_merge]
