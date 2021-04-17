@@ -133,6 +133,8 @@ server <- function(input, output, session) {
         w$update(html=span("substituting"))
         #keep only space and word characters
         reannotated <- gsub("[^a-z A-Z]", "", input$text, perl = TRUE)
+        #keep only space and word characters
+        reannotated <- gsub("\\s+", " ", input$text, perl = TRUE)
         w$update(html=span("splitting"))
         words <- strsplit(reannotated, split = " ", fixed = TRUE)[[1]]
         tryCatch({
