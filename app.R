@@ -8,6 +8,7 @@ library(gitlink)
 library(hyphenatr)
 library(waiter)
 
+app_version <- "0.0.2"
 construct_delimiter <- " "
 constituent_delimiter <- "-"
 subconstituent_delimiter <- "/"
@@ -72,10 +73,10 @@ collapse_words <- function(x){
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     use_waiter(),
-    titlePanel("Explore Menzerath's law"),
+    ribbon_css("https://github.com/sellisd/menzerathApp/issues", position = "right", text = "Report a bug"),
+    titlePanel(glue("Explore Menzerath's law, v. {app_version}")),
     theme = bslib::bs_theme(bootswatch = "pulse"),
     shinyFeedback::useShinyFeedback(),
-    ribbon_css("https://github.com/sellisd/menzerathApp/issues", position = "right", text = "Report a bug"),
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
@@ -134,7 +135,7 @@ server <- function(input, output, session) {
         #keep only space and word characters
         reannotated <- gsub("[^a-z A-Z]", "", input$text, perl = TRUE)
         #keep only space and word characters
-        reannotated <- gsub("\\s+", " ", input$text, perl = TRUE)
+        reannotated <- gsub("\\s+", " ", reannotated, perl = TRUE)
         w$update(html=span("splitting"))
         words <- strsplit(reannotated, split = " ", fixed = TRUE)[[1]]
         tryCatch({
